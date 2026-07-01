@@ -1,0 +1,267 @@
+{
+  "name": "AgriSmarties AI Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Welcome to AgriSmarties! Ask me anything about farming, crops, soil, weather, or agricultural best practices.",
+        "options": {
+          "inputPlaceholder": "Ask about crops, soil, weather, pests...",
+          "showWelcomeScreen": true,
+          "getStarted": "Start Your Farming Conversation",
+          "subtitle": "Your smart farming companion 🌾",
+          "title": "AgriSmarties AI Assistant",
+          "responseMode": "streaming"
+        }
+      },
+      "id": "7f2d95c5-f237-4c4d-8997-f84d8d7a64bc",
+      "name": "Farmer Question",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        240,
+        304
+      ],
+      "webhookId": "85c533ec-a4c3-4efd-9101-95c6645bc7c5"
+    },
+    {
+      "parameters": {
+        "text": "=",
+        "options": {
+          "systemMessage": "You are AgriSmarties AI.\n\nYou help farmers, agricultural businesses, and South African government departments.\n\nAnswer questions about:\n- Crop production\n- Livestock\n- Irrigation\n- Pests and diseases\n- Fertilizers\n- Weather preparedness\n- Soil health\n- Agricultural regulations\n- Government agricultural support\n\nGive practical, accurate, easy-to-understand advice. If you are unsure, say you don't know instead of making up information.",
+          "maxIterations": 10,
+          "returnIntermediateSteps": false
+        }
+      },
+      "id": "0d828c8f-7f63-4071-a4d2-9a4202b15a88",
+      "name": "AgriSmarties AI",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        464,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "id": "6ed38e6c-d122-4592-9a17-0de17910d70a",
+      "name": "Chat Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        608,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agrismarties-ai",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        736,
+        576
+      ],
+      "id": "1c4a2e5b-88bb-4a13-b5f9-7709f73af157",
+      "name": "Webhook",
+      "webhookId": "15406534-71b2-495e-b06f-6525ee76ab4f"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are AgriSmarties AI, an agriculture assistant for farmers, agribusinesses, and government departments in South Africa. Provide clear, practical, and accurate farming advice. If you are unsure, say so instead of making up information."
+            },
+            {
+              "content": "={{ $json.body.question}}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        800,
+        576
+      ],
+      "id": "6efaa693-c270-436b-bb9d-12009b7e00c6",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "MLL04kjMEXLQdu9i",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        336,
+        512
+      ],
+      "id": "0929a231-a069-4329-bfb6-00c2c92f8963",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "vFbkCkHN5h7wMAG7",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        816,
+        320
+      ],
+      "id": "c22ac20b-03c2-42ec-b889-10be48771538",
+      "name": "Simple Vector Store"
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "AgriSmarties AI Knowledge Base\n\nMaize:\n- Plant in well-drained soil.\n- Yellow leaves may indicate nitrogen deficiency or overwatering.\n- Scout regularly for Fall Armyworm.\n\nTomatoes:\n- Require 6–8 hours of sunlight daily.\n- Avoid overwatering.\n- Leaf curl can be caused by pests, heat stress, or viral diseases.\n\nLivestock:\n- Provide clean drinking water.\n- Vaccinate animals according to veterinary guidelines.\n- Isolate sick animals.\n\nGeneral:\n- Promote sustainable farming.\n- Protect soil health.\n- Encourage efficient water use.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        960,
+        528
+      ],
+      "id": "6596a7e4-340c-45b8-8d44-830772b159f1",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        960,
+        624
+      ],
+      "id": "35b1ac21-7200-4089-b697-30f1630421c5",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "vFbkCkHN5h7wMAG7",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Farmer Question": {
+      "main": [
+        [
+          {
+            "node": "AgriSmarties AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AgriSmarties AI",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AgriSmarties AI",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "2aa478ab-09bb-45c0-9ef6-0af352b11ce7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4ad9812eaae50383eb4d8c130351b58cfb19bb07a7a682141e6230783cbad7ca"
+  },
+  "nodeGroups": [],
+  "id": "fVk7bUY1Qk4NR1Ph",
+  "tags": []
+}
